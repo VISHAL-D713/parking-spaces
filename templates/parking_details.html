@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  #map { height: 400px; width: 100%; margin-bottom: 1em; border-radius: 10px; }
+  .btn {
+      background: #4e73df;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+  }
+  .btn:hover {
+      background: #1cc88a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  }
+  .error {
+      color: red;
+      font-size: 0.9em;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Parking Spot Details</h1>
+<p><strong>Location:</strong> {{ spot.location }}</p>
+<p><strong>Owner:</strong> {{ spot.owner.name }}</p>
+<p><strong>Timings:</strong> {{ spot.timings }}</p>
+<p><strong>Price per hour:</strong> ₹{{ '%.2f'|format(spot.price_per_hour) }}</p>
+<p><strong>Availability:</strong> {{ 'Available' if spot.availability else 'Unavailable' }}</p>
+
+<div id="map"></div>
+
+{% if spot.availability %}
+<h2>Book this Spot</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <label for="start_time">Start Time:</label>
+    {{ form.start_time(class="form-control") }}
+    {% for error in form.start_time.errors %}
+        <span class="error">{{ error }}</span>
+    {% endfor %}
+
+    <label for="end_time">End Time:</label>
+    {{ form.end_time(class="form-control") }}
+    {% for error in form.end_time.errors %}
+        <span class="error">{{ error }}</span>
+    {% endfor %}
+
+    {{ form.submit(class="btn") }}
+</form>
+{% else %}
+<p style="color:red; font-weight:bold;">This spot is not available for booking.</p>
+{% endif %}
+
+<p><a href="{{ url_for('all_spots') }}">Back to All Spots</a></p>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var map = L.map('map').setView([{{ spot.latitude or 18.5204 }}, {{ spot.longitude or 73.8567 }}], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    {% if spot.latitude and spot.longitude %}
+        L.marker([{{ spot.latitude }}, {{ spot.longitude }}]).addTo(map)
+            .bindPopup("<b>{{ spot.location }}</b><br>₹{{ spot.price_per_hour }}/hr<br>Timings: {{ spot.timings }}")
+            .openPopup();
+    {% endif %}
+});
+</script>
+{% endblock %}

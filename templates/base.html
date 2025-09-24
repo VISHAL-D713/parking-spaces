@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Parking Space Finder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.jpeg') }}">
+
+    {% block extra_head %}{% endblock %}  <!-- ✅ Needed for Leaflet CSS -->
+
+    <style>
+        /* Smooth fade-in animation for the page */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Navbar styling */
+        nav {
+            background: linear-gradient(135deg, #4e73df, #1cc88a);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        nav a::after {
+            content: "";
+            position: absolute;
+            width: 0%;
+            height: 2px;
+            left: 0;
+            bottom: -5px;
+            background: white;
+            transition: width 0.3s ease;
+        }
+        nav a:hover::after {
+            width: 100%;
+        }
+        nav a:hover {
+            transform: scale(1.1);
+        }
+
+        /* Flash messages animation */
+        .flashes {
+            list-style: none;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .flashes li {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 5px;
+            animation: slideIn 0.6s ease-out;
+        }
+        .flash-success { background-color: #d4edda; color: #155724; }
+        .flash-danger { background-color: #f8d7da; color: #721c24; }
+        .flash-warning { background-color: #fff3cd; color: #856404; }
+        .flash-info { background-color: #d1ecf1; color: #0c5460; }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Container styling */
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            animation: fadeUp 0.7s ease;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Buttons styling */
+        button, .btn {
+            background: #4e73df;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        button:hover, .btn:hover {
+            background: #1cc88a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        table th {
+            background-color: #4e73df;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { margin: 1rem; padding: 1rem; }
+            nav { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        {% if session.get('user_id') %}
+            {% if session.get('role') == 'owner' %}
+                <a href="{{ url_for('add_parking') }}">Add Parking Spot</a>
+                <a href="{{ url_for('manage_listings') }}">Manage Listings</a>
+            {% elif session.get('role') == 'commuter' %}
+                <a href="{{ url_for('all_spots') }}">View All Spots</a>
+                <a href="{{ url_for('map_view') }}">Map View</a> 
+            {% endif %}
+            <a href="{{ url_for('logout') }}">Logout ({{ session.get('user_name') }})</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}">Register</a>
+            <a href="{{ url_for('all_spots') }}">View All Spots</a>
+        {% endif %}
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="{{ url_for('search') }}">Search</a>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash-{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}  <!-- ✅ Needed for Leaflet JS -->
+</body>
+</html>

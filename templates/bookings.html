@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>My Bookings</h1>
+{% if bookings %}
+<table>
+    <thead>
+        <tr>
+            <th>Parking Spot</th>
+            <th>Location</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for b in bookings %}
+        <tr>
+            <td><a href="{{ url_for('parking_details', spot_id=b.parking_spot.id) }}">{{ b.parking_spot.location }}</a></td>
+            <td>{{ b.parking_spot.location }}</td>
+            <td>{{ b.start_time.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ b.end_time.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ b.status }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>You have no bookings yet.</p>
+{% endif %}
+{% endblock %}

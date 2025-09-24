@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Search Parking Spots</h2>
+
+<form action="{{ url_for('search') }}" method="get">
+    <input type="text" name="query" placeholder="Search location..." value="{{ query or '' }}" required>
+    <button type="submit">Search</button>
+</form>
+
+{% if spots %}
+<table border="1" cellpadding="10" cellspacing="0" style="margin-top: 20px;">
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Timings</th>
+            <th>Price (₹/hr)</th>
+            <th>Available</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for spot in spots %}
+        <tr>
+            <td>{{ spot.location }}</td>
+            <td>{{ spot.timings }}</td>
+            <td>₹{{ '%.2f'|format(spot.price_per_hour) }}</td>
+            <td>{{ 'Yes' if spot.availability else 'No' }}</td>
+            <td>
+                {% if spot.availability %}
+                <a href="{{ url_for('parking_details', spot_id=spot.id) }}" class="btn">Book Now</a>
+                {% else %}
+                <span style="color: red; font-weight: bold;">Not Available</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% elif query %}
+<p>No parking spots found for "{{ query }}".</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+  .about-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+  }
+  .about-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+  }
+  .about-container p {
+      margin-bottom: 15px;
+      color: #555;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <h2>About Parking Finder</h2>
+    <p>
+        Parking Finder is a smart web application designed to help commuters easily
+        find available parking spots in real time. It connects parking spot owners
+        with users who need safe and convenient parking.
+    </p>
+    <p>
+        With features like live map view, price and timings display, and a simple
+        booking system, Parking Finder reduces traffic congestion and saves time
+        for commuters.
+    </p>
+    <p>
+        Our mission is to create a stress-free parking experience for everyone while
+        making better use of available spaces in the city.
+    </p>
+</div>
+{% endblock %}

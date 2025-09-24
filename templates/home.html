@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #4e73df, #1cc88a); color: white; border-radius: 12px;">
+    <h1 style="font-size: 3rem; margin-bottom: 20px; animation: fadeIn 1.2s ease;">Welcome to Parking Space Finder!</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 30px; animation: fadeIn 1.5s ease;">
+        Find available parking spots near you quickly and easily.
+    </p>
+    <a href="{{ url_for('all_spots') }}" class="btn" style="padding: 15px 30px; font-size: 1.2rem; animation: fadeIn 1.8s ease;">View All Parking Spots</a>
+</div>
+
+<!-- Optional: quick search form -->
+<!-- <div style="text-align: center; margin: 40px 0;">
+    <form action="{{ url_for('home') }}" method="get">
+        <input type="text" name="query" placeholder="Search by location..." value="{{ query or '' }}" style="padding: 10px; width: 250px; border-radius: 5px; border: 1px solid #ccc;">
+        <a href="{{ url_for('search') }}"><button type="submit" class="btn">Search</button></a>
+    </form>
+</div> -->
+
+{% if spots %}
+    <h3 style="text-align: center; margin-bottom: 20px;">Available Parking Spots</h3>
+    <table border="1" cellpadding="10" cellspacing="0" style="margin: 0 auto; width: 90%; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <thead style="background: #4e73df; color: white;">
+            <tr>
+                <th>Location</th>
+                <th>Timings</th>
+                <th>Price (₹/hour)</th>
+                <th>Availability</th>
+                {% if session.get('role') == 'commuter' %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for spot in spots %}
+            <tr>
+                <td>{{ spot.location }}</td>
+                <td>{{ spot.timings }}</td>
+                <td>₹{{ '%.2f'|format(spot.price_per_hour) }}</td>
+                <td>{{ 'Yes' if spot.availability else 'No' }}</td>
+                {% if session.get('role') == 'commuter' %}
+                <td>
+                    {% if spot.availability %}
+                        <a href="{{ url_for('parking_details', spot_id=spot.id) }}" class="btn">Book Now</a>
+                    {% else %}
+                        <span style="color:red; font-weight: bold;">Not Available</span>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% elif query %}
+    <p style="text-align: center; color:red;">No parking spots found for "{{ query }}".</p>
+{% endif %}
+{% endblock %}

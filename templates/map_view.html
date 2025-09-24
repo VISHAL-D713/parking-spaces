@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  #map { height: 500px; width: 100%; margin: 20px 0; border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+  th { background-color: #f2f2f2; }
+  .btn { padding: 5px 10px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Parking Spots Map</h2>
+<div id="map"></div>
+
+{% if spots %}
+<table>
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Timings</th>
+            <th>Price (₹/hr)</th>
+            <th>Availability</th>
+            {% if session.get('role') == 'commuter' %}
+            <th>Action</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for spot in spots %}
+        <tr>
+            <td>{{ spot.location }}</td>
+            <td>{{ spot.timings }}</td>
+            <td>₹{{ '%.2f'|format(spot.price_per_hour) }}</td>
+            <td>{{ 'Yes' if spot.availability else 'No' }}</td>
+            {% if session.get('role') == 'commuter' %}
+            <td><a href="{{ url_for('parking_details', spot_id=spot.id) }}" class="btn">Book Now</a></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No parking spots are currently available.</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var map = L.map('map').setView([18.5204, 73.8567], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var spots = {{ spots|tojson }};
+    spots.forEach(function(spot) {
+        if (spot.lat && spot.lng) {
+            var marker = L.marker([spot.lat, spot.lng]).addTo(map);
+            marker.bindPopup(
+                "<b>" + spot.location + "</b><br>" +
+                "₹" + spot.price_per_hour + "/hr<br>" +
+                "Timings: " + spot.timings + "<br>" +
+                "Availability: " + (spot.availability ? 'Yes' : 'No')
+            );
+        }
+    });
+});
+</script>
+{% endblock %}

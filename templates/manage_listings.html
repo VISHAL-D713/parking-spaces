@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Manage Your Listings</h2>
+
+{% if spots %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Timings</th>
+            <th>Price (₹/hr)</th>
+            <th>Available</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for spot in spots %}
+        <tr>
+            <td>{{ spot.location }}</td>
+            <td>{{ spot.timings }}</td>
+            <td>₹{{ '%.2f'|format(spot.price_per_hour) }}</td>
+            <td>{{ 'Yes' if spot.availability else 'No' }}</td>
+            <td>
+                <a href="{{ url_for('edit_parking', spot_id=spot.id) }}" class="btn">Edit</a>
+                <form action="{{ url_for('delete_parking', spot_id=spot.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this listing?');">
+                    <button type="submit" class="btn" style="background:red;">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No parking spots listed yet. Add a new spot.</p>
+{% endif %}
+
+<br>
+<a href="{{ url_for('add_parking') }}" class="btn">Add New Parking Spot</a>
+{% endblock %}
